@@ -15,7 +15,7 @@ frappe.route_options = null;
 frappe.open_in_new_tab = false;
 frappe.route_hooks = {};
 
-$(window).on("hashchange", function (e) {
+$(window).on("hashchange", function(e) {
 	// v1 style routing, route is in hash
 	if (window.location.hash && !frappe.router.is_app_route(e.currentTarget.pathname)) {
 		let sub_path = frappe.router.get_sub_path(window.location.hash);
@@ -24,7 +24,7 @@ $(window).on("hashchange", function (e) {
 	}
 });
 
-window.addEventListener("popstate", (e) => {
+window.addEventListener("popstate", e => {
 	// forward-back button, just re-render based on current route
 	frappe.router.route();
 	e.preventDefault();
@@ -32,12 +32,12 @@ window.addEventListener("popstate", (e) => {
 });
 
 // Capture all clicks so that the target is managed with push-state
-$("body").on("click", "a", function (e) {
+$("body").on("click", "a", function(e) {
 	const target_element = e.currentTarget;
 	const href = target_element.getAttribute("href");
 	const is_on_same_host = target_element.hostname === window.location.hostname;
 
-	const override = (route) => {
+	const override = route => {
 		e.preventDefault();
 		frappe.set_route(route);
 		return false;
@@ -89,7 +89,7 @@ frappe.router = {
 		"dashboard",
 		"image",
 		"inbox",
-		"map",
+		"map"
 	],
 	list_views_route: {
 		list: "List",
@@ -102,7 +102,7 @@ frappe.router = {
 		image: "Image",
 		inbox: "Inbox",
 		file: "Home",
-		map: "Map",
+		map: "Map"
 	},
 	layout_mapped: {},
 
@@ -124,7 +124,7 @@ frappe.router = {
 			for (let doctype_layout of frappe.boot.doctype_layouts) {
 				this.routes[this.slug(doctype_layout.name)] = {
 					doctype: doctype_layout.document_type,
-					doctype_layout: doctype_layout.name,
+					doctype_layout: doctype_layout.name
 				};
 			}
 		}
@@ -220,7 +220,7 @@ frappe.router = {
 				route = [
 					"List",
 					doctype_route.doctype,
-					this.list_views_route[meta.default_view.toLowerCase()],
+					this.list_views_route[meta.default_view.toLowerCase()]
 				];
 			} else {
 				route = ["List", doctype_route.doctype, "List"];
@@ -267,7 +267,7 @@ frappe.router = {
 			standard_route = [
 				"List",
 				doctype_route.doctype,
-				this.list_views_route[_route.toLowerCase()],
+				this.list_views_route[_route.toLowerCase()]
 			];
 
 			// calendar / kanban / dashboard / folder
@@ -347,7 +347,7 @@ frappe.router = {
 		// example 3: frappe.set_route('a/b/c');
 		let route = Array.from(arguments);
 
-		return new Promise((resolve) => {
+		return new Promise(resolve => {
 			route = this.get_route_from_arguments(route);
 			route = this.convert_from_standard_route(route);
 			let sub_path = this.make_url(route);
@@ -436,7 +436,7 @@ frappe.router = {
 	},
 
 	make_url(params) {
-		let path_string = $.map(params, function (a) {
+		let path_string = $.map(params, function(a) {
 			if ($.isPlainObject(a)) {
 				frappe.route_options = a;
 				return null;
@@ -530,17 +530,17 @@ frappe.router = {
 
 	slug(name) {
 		return name.toLowerCase().replace(/ /g, "-");
-	},
+	}
 };
 
 // global functions for backward compatibility
 frappe.get_route = () => frappe.router.current_route;
 frappe.get_route_str = () => frappe.router.current_route.join("/");
-frappe.set_route = function () {
+frappe.set_route = function() {
 	return frappe.router.set_route.apply(frappe.router, arguments);
 };
 
-frappe.get_prev_route = function () {
+frappe.get_prev_route = function() {
 	if (frappe.route_history && frappe.route_history.length > 1) {
 		return frappe.route_history[frappe.route_history.length - 2];
 	} else {
@@ -548,13 +548,13 @@ frappe.get_prev_route = function () {
 	}
 };
 
-frappe.set_re_route = function () {
+frappe.set_re_route = function() {
 	var tmp = frappe.router.get_sub_path();
 	frappe.set_route.apply(null, arguments);
 	frappe.re_route[tmp] = frappe.router.get_sub_path();
 };
 
-frappe.has_route_options = function () {
+frappe.has_route_options = function() {
 	return Boolean(Object.keys(frappe.route_options || {}).length);
 };
 

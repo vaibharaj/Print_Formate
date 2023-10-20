@@ -9,7 +9,7 @@
 .toggle {
 	height: 9px;
 	width: 9px;
-	display: inline-block;
+	display: block;
 	visibility: visible;
 }
 

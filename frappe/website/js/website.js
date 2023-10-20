@@ -10,10 +10,10 @@ window.cur_frm = null;
 
 $.extend(frappe, {
 	boot: {
-		lang: "en",
+		lang: "en"
 	},
 	_assets_loaded: [],
-	require: async function (links, callback) {
+	require: async function(links, callback) {
 		if (typeof links === "string") {
 			links = [links];
 		}
@@ -23,7 +23,7 @@ $.extend(frappe, {
 		callback && callback();
 	},
 	add_asset_to_head(link) {
-		return new Promise((resolve) => {
+		return new Promise(resolve => {
 			if (frappe._assets_loaded.includes(link)) return resolve();
 			let el;
 			if (link.split(".").pop() === "js") {
@@ -43,30 +43,30 @@ $.extend(frappe, {
 			};
 		});
 	},
-	hide_message: function () {
+	hide_message: function() {
 		$(".message-overlay").remove();
 	},
-	xcall: function (method, params) {
+	xcall: function(method, params) {
 		return new Promise((resolve, reject) => {
 			frappe.call({
 				method: method,
 				args: params,
-				callback: (r) => {
+				callback: r => {
 					resolve(r.message);
 				},
-				error: (r) => {
+				error: r => {
 					reject(r.message);
-				},
+				}
 			});
 		});
 	},
-	call: function (opts) {
+	call: function(opts) {
 		// opts = {"method": "PYTHON MODULE STRING", "args": {}, "callback": function(r) {}}
 		if (typeof arguments[0] === "string") {
 			opts = {
 				method: arguments[0],
 				args: arguments[1],
-				callback: arguments[2],
+				callback: arguments[2]
 			};
 		}
 
@@ -81,21 +81,21 @@ $.extend(frappe, {
 			dataType: "json",
 			headers: {
 				"X-Frappe-CSRF-Token": frappe.csrf_token,
-				"X-Frappe-CMD": (opts.args && opts.args.cmd) || "" || "",
+				"X-Frappe-CMD": (opts.args && opts.args.cmd) || "" || ""
 			},
 			statusCode: opts.statusCode || {
-				404: function () {
+				404: function() {
 					frappe.msgprint(__("Not found"));
 				},
-				403: function () {
+				403: function() {
 					frappe.msgprint(__("Not permitted"));
 				},
-				200: function (data) {
+				200: function(data) {
 					if (opts.callback) opts.callback(data);
 					if (opts.success) opts.success(data);
-				},
-			},
-		}).always(function (data) {
+				}
+			}
+		}).always(function(data) {
 			if (opts.freeze) {
 				frappe.unfreeze();
 			}
@@ -111,7 +111,7 @@ $.extend(frappe, {
 			frappe.process_response(opts, data);
 		});
 	},
-	prepare_call: function (opts) {
+	prepare_call: function(opts) {
 		if (opts.btn) {
 			$(opts.btn).prop("disabled", true);
 		}
@@ -127,7 +127,7 @@ $.extend(frappe, {
 			opts.args.cmd = opts.method;
 		}
 
-		$.each(opts.args, function (key, val) {
+		$.each(opts.args, function(key, val) {
 			if (typeof val != "string" && val !== null) {
 				opts.args[key] = JSON.stringify(val);
 			}
@@ -137,7 +137,7 @@ $.extend(frappe, {
 			//NProgress.start();
 		}
 	},
-	process_response: function (opts, data) {
+	process_response: function(opts, data) {
 		//if(!opts.no_spinner) NProgress.done();
 
 		if (opts.btn) {
@@ -147,7 +147,7 @@ $.extend(frappe, {
 		if (data._server_messages) {
 			var server_messages = JSON.parse(data._server_messages || "[]");
 			server_messages
-				.map((msg) => {
+				.map(msg => {
 					// temp fix for messages sent as dict
 					try {
 						return JSON.parse(msg);
@@ -158,7 +158,9 @@ $.extend(frappe, {
 				.join("<br>");
 
 			if (opts.error_msg) {
-				$(opts.error_msg).html(server_messages).toggle(true);
+				$(opts.error_msg)
+					.html(server_messages)
+					.toggle(true);
 			} else {
 				frappe.msgprint(server_messages);
 			}
@@ -185,14 +187,16 @@ $.extend(frappe, {
 			// }
 		}
 		if (opts.msg && data.message) {
-			$(opts.msg).html(data.message).toggle(true);
+			$(opts.msg)
+				.html(data.message)
+				.toggle(true);
 		}
 
 		if (opts.always) {
 			opts.always(data);
 		}
 	},
-	show_message: function (text, icon) {
+	show_message: function(text, icon) {
 		if (!icon) icon = "fa fa-refresh fa-spin";
 		frappe.hide_message();
 		$('<div class="message-overlay"></div>')
@@ -205,31 +209,31 @@ $.extend(frappe, {
 			)
 			.appendTo(document.body);
 	},
-	send_message: function (opts, btn) {
+	send_message: function(opts, btn) {
 		return frappe.call({
 			type: "POST",
 			method: "frappe.www.contact.send_message",
 			btn: btn,
 			args: opts,
-			callback: opts.callback,
+			callback: opts.callback
 		});
 	},
-	has_permission: function (doctype, docname, perm_type, callback) {
+	has_permission: function(doctype, docname, perm_type, callback) {
 		return frappe.call({
 			type: "GET",
 			method: "frappe.client.has_permission",
 			no_spinner: true,
 			args: { doctype: doctype, docname: docname, perm_type: perm_type },
-			callback: function (r) {
+			callback: function(r) {
 				if (!r.exc && r.message.has_permission) {
 					if (callback) {
 						return callback(r);
 					}
 				}
-			},
+			}
 		});
 	},
-	render_user: function () {
+	render_user: function() {
 		if (frappe.is_user_logged_in()) {
 			$(".btn-login-area").toggle(false);
 			$(".logged-in").toggle(true);
@@ -247,7 +251,7 @@ $.extend(frappe, {
 		}
 	},
 	freeze_count: 0,
-	freeze: function (msg) {
+	freeze: function(msg) {
 		// blur
 		if (!$("#freeze").length) {
 			var freeze = $('<div id="freeze" class="modal-backdrop fade"></div>').appendTo("body");
@@ -259,7 +263,7 @@ $.extend(frappe, {
 				)
 			);
 
-			setTimeout(function () {
+			setTimeout(function() {
 				freeze.addClass("in");
 			}, 1);
 		} else {
@@ -267,12 +271,12 @@ $.extend(frappe, {
 		}
 		frappe.freeze_count++;
 	},
-	unfreeze: function () {
+	unfreeze: function() {
 		if (!frappe.freeze_count) return; // anything open?
 		frappe.freeze_count--;
 		if (!frappe.freeze_count) {
 			var freeze = $("#freeze").removeClass("in");
-			setTimeout(function () {
+			setTimeout(function() {
 				if (!frappe.freeze_count) {
 					freeze.remove();
 				}
@@ -280,18 +284,18 @@ $.extend(frappe, {
 		}
 	},
 
-	trigger_ready: function () {
-		frappe.ready_events.forEach(function (fn) {
+	trigger_ready: function() {
+		frappe.ready_events.forEach(function(fn) {
 			fn();
 		});
 	},
 
-	highlight_code_blocks: function () {
+	highlight_code_blocks: function() {
 		hljs.initHighlighting();
 	},
-	bind_filters: function () {
+	bind_filters: function() {
 		// set in select
-		$(".filter").each(function () {
+		$(".filter").each(function() {
 			var key = $(this).attr("data-key");
 			var val = frappe.utils.get_url_arg(key).replace(/\+/g, " ");
 
@@ -299,9 +303,9 @@ $.extend(frappe, {
 		});
 
 		// search url
-		var search = function () {
+		var search = function() {
 			var args = {};
-			$(".filter").each(function () {
+			$(".filter").each(function() {
 				var val = $(this).val();
 				if (val) args[$(this).attr("data-key")] = val;
 			});
@@ -309,21 +313,23 @@ $.extend(frappe, {
 			window.location.href = location.pathname + "?" + $.param(args);
 		};
 
-		$(".filter").on("change", function () {
+		$(".filter").on("change", function() {
 			search();
 		});
 	},
-	bind_navbar_search: function () {
-		frappe.get_navbar_search().on("keypress", function (e) {
+	bind_navbar_search: function() {
+		frappe.get_navbar_search().on("keypress", function(e) {
 			var val = $(this).val();
 			if (e.which === 13 && val) {
-				$(this).val("").blur();
+				$(this)
+					.val("")
+					.blur();
 				frappe.do_search(val);
 				return false;
 			}
 		});
 	},
-	do_search: function (val) {
+	do_search: function(val) {
 		var path =
 			(frappe.awesome_bar_path && frappe.awesome_bar_path[location.pathname]) ||
 			window.search_path ||
@@ -331,13 +337,13 @@ $.extend(frappe, {
 
 		window.location.href = path + "?txt=" + encodeURIComponent(val);
 	},
-	set_search_path: function (path) {
+	set_search_path: function(path) {
 		frappe.awesome_bar_path[location.pathname] = path;
 	},
-	make_navbar_active: function () {
+	make_navbar_active: function() {
 		var pathname = window.location.pathname;
 		$(".navbar-nav a.active").removeClass("active");
-		$(".navbar-nav a").each(function () {
+		$(".navbar-nav a").each(function() {
 			var href = $(this).attr("href");
 			if (href === pathname) {
 				$(this).addClass("active");
@@ -345,16 +351,16 @@ $.extend(frappe, {
 			}
 		});
 	},
-	get_navbar_search: function () {
+	get_navbar_search: function() {
 		return $(".navbar .search, .sidebar .search");
 	},
-	is_user_logged_in: function () {
+	is_user_logged_in: function() {
 		return frappe.get_cookie("user_id") !== "Guest" && frappe.session.user !== "Guest";
 	},
-	add_switch_to_desk: function () {
+	add_switch_to_desk: function() {
 		$(".switch-to-desk").removeClass("hidden");
 	},
-	add_link_to_headings: function () {
+	add_link_to_headings: function() {
 		$(".doc-content .from-markdown")
 			.find("h2, h3, h4, h5, h6")
 			.each((i, $heading) => {
@@ -371,7 +377,7 @@ $.extend(frappe, {
 				$($heading).append($a);
 			});
 	},
-	setup_lazy_images: function () {
+	setup_lazy_images: function() {
 		// Use IntersectionObserver to only load images that are visible in the viewport
 		// Fallback for browsers that don't support it
 		// To use this feature, instead of adding an img tag, add
@@ -383,8 +389,8 @@ $.extend(frappe, {
 			const $target = $(target);
 			const attrs = $target.data();
 			const data_string = Object.keys(attrs)
-				.filter((key) => allowed_attributes.includes(key))
-				.map((key) => `${key}="${attrs[key]}"`)
+				.filter(key => allowed_attributes.includes(key))
+				.map(key => `${key}="${attrs[key]}"`)
 				.join(" ");
 			$target.replaceWith(`<img ${data_string}>`);
 		}
@@ -397,8 +403,8 @@ $.extend(frappe, {
 		}
 
 		const io = new IntersectionObserver(
-			(entries) => {
-				entries.forEach((e) => {
+			entries => {
+				entries.forEach(e => {
 					if (e.intersectionRatio > 0) {
 						io.unobserve(e.target);
 						replace_with_image(e.target);
@@ -406,7 +412,7 @@ $.extend(frappe, {
 				});
 			},
 			{
-				threshold: [0, 0.2, 0.4, 0.6],
+				threshold: [0, 0.2, 0.4, 0.6]
 			}
 		);
 
@@ -419,14 +425,14 @@ $.extend(frappe, {
 		if (frappe.session.user === "Guest" && window.show_language_picker) {
 			frappe
 				.call("frappe.translate.get_all_languages", {
-					with_language_name: true,
+					with_language_name: true
 				})
-				.then((res) => {
+				.then(res => {
 					let language_list = res.message;
 					let language = frappe.get_cookie("preferred_language");
 					let language_codes = [];
 					let language_switcher = $("#language-switcher .form-control");
-					language_list.forEach((language_doc) => {
+					language_list.forEach(language_doc => {
 						language_codes.push(language_doc.language_code);
 						language_switcher.append(
 							$("<option></option>")
@@ -450,7 +456,7 @@ $.extend(frappe, {
 	},
 	setup_videos: () => {
 		// converts video images into youtube embeds (via Page Builder)
-		$(".section-video-wrapper").on("click", (e) => {
+		$(".section-video-wrapper").on("click", e => {
 			let $video = $(e.currentTarget);
 			let id = $video.data("youtubeId");
 			console.log(id);
@@ -459,10 +465,10 @@ $.extend(frappe, {
 				<iframe allowfullscreen="" class="section-video" f;rameborder="0" src="//youtube.com/embed/${id}?autoplay=1"></iframe>
 			`);
 		});
-	},
+	}
 });
 
-frappe.setup_search = function (target, search_scope) {
+frappe.setup_search = function(target, search_scope) {
 	if (typeof target === "string") {
 		target = $(target);
 	}
@@ -492,7 +498,7 @@ frappe.setup_search = function (target, search_scope) {
 	let dropdownItems;
 	let offsetIndex = 0;
 
-	$(document).on("keypress", (e) => {
+	$(document).on("keypress", e => {
 		if ($(e.target).is("textarea, input, select")) {
 			return;
 		}
@@ -516,17 +522,17 @@ frappe.setup_search = function (target, search_scope) {
 					args: {
 						scope: search_scope || null,
 						query: $input.val(),
-						limit: 5,
-					},
+						limit: 5
+					}
 				})
-				.then((r) => {
+				.then(r => {
 					let results = r.message || [];
 					let dropdown_html;
 					if (results.length == 0) {
 						dropdown_html = `<div class="dropdown-item">No results found</div>`;
 					} else {
 						dropdown_html = results
-							.map((r) => {
+							.map(r => {
 								return `<a class="dropdown-item" href="/${r.path}">
 						<h6>${r.title_highlights || r.title}</h6>
 						<div style="white-space: normal;">${r.content_highlights}</div>
@@ -549,14 +555,14 @@ frappe.setup_search = function (target, search_scope) {
 		}
 	});
 
-	$input.keydown(function (e) {
+	$input.keydown(function(e) {
 		// up: 38, down: 40
 		if (e.which == 40) {
 			navigate(0);
 		}
 	});
 
-	$dropdown_menu.keydown(function (e) {
+	$dropdown_menu.keydown(function(e) {
 		// up: 38, down: 40
 		if (e.which == 38) {
 			navigate(-1);
@@ -570,16 +576,16 @@ frappe.setup_search = function (target, search_scope) {
 	});
 
 	// Clear dropdown when clicked
-	$(window).click(function () {
+	$(window).click(function() {
 		clear_dropdown();
 	});
 
-	$search_input.click(function (event) {
+	$search_input.click(function(event) {
 		event.stopPropagation();
 	});
 
 	// Navigate the list
-	var navigate = function (diff) {
+	var navigate = function(diff) {
 		offsetIndex += diff;
 
 		if (offsetIndex >= dropdownItems.length) offsetIndex = 0;
@@ -596,13 +602,13 @@ frappe.setup_search = function (target, search_scope) {
 	}
 
 	// Remove focus state on hover
-	$dropdown_menu.mouseover(function () {
+	$dropdown_menu.mouseover(function() {
 		dropdownItems.blur();
 	});
 };
 
 // Utility functions
-window.valid_email = function (id) {
+window.valid_email = function(id) {
 	// eslint-disable-next-line
 	// copied regex from frappe/utils.js validate_type
 	return /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))$/.test(
@@ -612,7 +618,7 @@ window.valid_email = function (id) {
 
 window.validate_email = valid_email;
 
-window.cstr = function (s) {
+window.cstr = function(s) {
 	return s == null ? "" : s + "";
 };
 
@@ -645,7 +651,7 @@ window.ask_to_login = function ask_to_login() {
 };
 
 // check if logged in?
-$(document).ready(function () {
+$(document).ready(function() {
 	window.full_name = frappe.get_cookie("full_name");
 	var logged_in = frappe.is_user_logged_in();
 	$("#website-login").toggleClass("hide", logged_in ? true : false);
@@ -665,14 +671,18 @@ $(document).ready(function () {
 	$(document).trigger("page-change");
 });
 
-$(document).on("page-change", function () {
+$(document).on("page-change", function() {
 	$(document).trigger("apply_permissions");
 	$(".dropdown-toggle").dropdown();
 
 	//multilevel dropdown fix
-	$(".dropdown-menu .dropdown-submenu .dropdown-toggle").on("click", function (e) {
+	$(".dropdown-menu .dropdown-submenu .dropdown-toggle").on("click", function(e) {
 		e.stopPropagation();
-		$(this).parent().parent().parent().addClass("open");
+		$(this)
+			.parent()
+			.parent()
+			.parent()
+			.addClass("open");
 	});
 
 	$.extend(frappe, frappe.get_cookies());
@@ -691,7 +701,7 @@ $(document).on("page-change", function () {
 	}
 });
 
-frappe.ready(function () {
+frappe.ready(function() {
 	frappe.show_language_picker();
 	frappe.setup_videos();
 	frappe.socketio.init(window.socketio_port);
